@@ -1,0 +1,266 @@
+#include <queue>
+#include <vector>
+#include <stack>
+using namespace std;
+
+#ifndef Binary_Search_Tree
+#define Binary_Search_Tree
+
+template<class T> class Tree;
+
+template<class T>
+class Node {
+public:
+	Node() { left=right=NULL; }
+	Node(const T& el, Node *l=0, Node *r=0) 
+	{
+		key=el; left=l; right=r;
+	}
+	Node(double el)
+	{
+		key=el;
+		left=NULL; 
+		right=NULL;
+	}
+	T key;
+	int lineNum;
+	Node *left, *right;
+};
+
+template<class T>
+class Tree {
+public:
+	Tree() { root = 0; }
+	~Tree() { clear(); }
+	void clear() { clear(root); root = 0; }
+	bool isEmpty() { return root == 0; }
+	void inorder() { inorder(root); }
+	void inorderBalance() { inorder(root); }
+	void insert(const T &el);
+	void deleteNode(int del);
+	void visit(Node<T> *p);
+	int findHight(Node<T> *p);
+	void balance(vector<T> myVector,int first, int last);
+	void random(int a);
+	vector<T> myVector; 
+	bool search(Node<T> *p,const T& el);
+	
+	Node<T> *root;
+	Node<T> *WDel;
+	Node<T> *BWDel;
+	
+
+protected:
+	int bala;
+	void clear(Node<T> *p);
+	void inorder(Node<T> *p);
+
+};
+
+template<class T>
+void Tree<T>::clear(Node<T> *p)
+{
+	if (p != 0)
+	{
+	     clear(p->left);
+	     clear(p->right);
+	     delete p;
+	}
+}
+
+template<class T>
+void Tree<T>::inorder(Node<T> *p) 
+{
+	if (p!=0) 
+	{
+		inorder(p->left);
+		visit(p);
+		inorder(p->right);
+	}
+}
+
+template<class T>
+void Tree<T>::insert(const T &el) {
+	Node<T> *p = root, *prev = 0;
+	while(p != 0) {
+		prev = p;
+		if(p->key < el)
+			p=p->right;
+		else
+			p=p->left;
+	}
+	if(root == 0)
+		root = new Node<T>(el);
+	else if(prev->key<el)
+		prev->right = new Node<T>(el);
+	else
+		prev->left = new Node<T>(el);
+}
+
+template<class T>
+void Tree<T>::deleteNode(int del) {
+	Node<T> *prev, *tmp , *tmp2;
+	BWDel = 0;
+	WDel = 0;
+	int a = search(root, del);
+	tmp = WDel;
+	if(a == 1)
+	{
+		if(BWDel->left == WDel)
+		{
+			if (WDel->left == 0 && WDel->right == 0)
+			{
+				delete tmp;
+			}
+			else if (WDel->left == 0 || WDel->right == 0)
+			{
+				if (WDel->left == 0)
+				{
+					tmp = WDel->right;
+					BWDel->left =  tmp;
+					delete WDel;
+				}
+				else
+				{
+					tmp = WDel->left;
+					BWDel->left =  tmp;
+					delete WDel;
+				}
+			}
+			else
+			{
+				tmp = WDel->left;
+				tmp2 = WDel->left;
+				while (tmp2->right != 0)
+				{
+					tmp2 = tmp2->right;
+				}
+				tmp2->right = WDel->right;
+				BWDel->left = tmp;
+				delete WDel;
+			}
+		}
+		else
+		{
+			if (WDel->left == 0 && WDel->right == 0)
+			{
+				delete tmp;
+			}
+			else if (WDel->left == 0 || WDel->right == 0)
+			{
+				if (WDel->left == 0)
+				{
+					tmp = WDel->right;
+					BWDel->right =  tmp;
+					delete WDel;
+				}
+				else
+				{
+					tmp = WDel->left;
+					BWDel->right =  tmp;
+					delete WDel;
+				}
+			}
+			else
+			{
+				tmp = WDel->left;
+				tmp2 = WDel->left;
+				while (tmp2->right != 0)
+				{
+					tmp2 = tmp2->right;
+				}
+				tmp2->right = WDel->right;
+				BWDel->right = tmp;
+				delete WDel;
+			}
+		}
+	}
+	else
+	{ 
+		cout << "This Number is not in Tree." <<endl; 
+	}
+}
+
+template<class T>
+void Tree<T>::visit(Node<T> *p)
+{
+	myVector.push_back(p->key);
+	cout << p->key <<" ";
+}
+
+
+template<class T>
+int Tree<T>::findHight(Node<T> *p)
+{
+	int left, right;
+
+	if (p == NULL)
+		return 0;
+	left = findHight(p->left);
+	right = findHight(p->right);
+	if (left > right)
+		return left + 1;
+	else
+		return right + 1;
+}
+
+template<class T>
+void Tree<T>::balance(vector<T> myVector,int first, int last) 
+{
+	if (first <= last) 
+	{
+		int middle = (first + last)/2;
+		insert(myVector.at(middle));
+		balance(myVector,first, middle-1);
+		balance(myVector,middle+1, last);
+	}
+}
+
+template<class T>
+void Tree<T>::random(int a)
+{
+	for (int i =0; i< a; i++)
+	{
+		int num = rand()% 99 -1;
+		insert(num);
+	}
+}
+
+template<class T>
+bool Tree<T>::search(Node<T> *p,const T& el)
+{
+	bool a;
+	while (p != 0)
+	{
+			if (el == p->key)
+			{
+				WDel = p;
+				a = 1;
+				p = 0;
+			}
+			else if (el < p->key)
+			{
+				BWDel = p;
+				p = p->left;
+			}
+			else
+			{
+				BWDel = p;
+				p = p->right;
+			}
+	}
+		if(a == 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+}
+
+
+
+
+#endif // Binary_Search_Tree
